@@ -1,0 +1,7 @@
+int8 box_id
+int8 box_status
+int8 door_cmd
+
+---
+
+int8 door_status
