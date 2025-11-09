@@ -21,7 +21,7 @@ class DoorControlNode : public rclcpp::Node
 
 
   private:
-   SerialSender serial_sender_{"/dev/ttyUSB0"}; // Initialize SerialSender with the appropriate port
+   SerialSender serial_sender_{"/dev/ttyBOX1"}; // Initialize SerialSender with the appropriate port
    int box_id_;
    int box_status_;
    int door_cmd_;
@@ -36,11 +36,11 @@ class DoorControlNode : public rclcpp::Node
       this->box_id_ = request->box_id;
       this->box_status_ = request->box_status;
       this->door_cmd_ = request->door_cmd;
-      this->data = std::to_string(this->box_id_)+ "," + std::to_string(this->box_status_) + "," + std::to_string(this->door_cmd_);
+      this->data = std::to_string(this->box_id_) + std::to_string(this->box_status_) + std::to_string(this->door_cmd_) + "#";
       door_status_ = serial_sender_.sendData(this->data);//Send command and get door status
      
-     response->door_status = door_status_;
-     RCLCPP_INFO(this->get_logger(), "Door status updated to: %d", response->door_status);
+      response->door_status = door_status_;
+      // RCLCPP_INFO(this->get_logger(), "Door status updated to: %d", response->door_status);
 
    };
 
