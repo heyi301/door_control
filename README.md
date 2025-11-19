@@ -52,3 +52,6 @@
 >sudo ./scripts/door_usb.sh -->
 ### 运行节点，启动服务：
 > ros2 run door_control door_control_node
+
+### 测试服务：
+> ros2 service call /door_control door_interface/srv/DoorControl "{box_id: 1, box_status: 1, door_cmd: 0}"
