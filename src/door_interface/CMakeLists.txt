@@ -9,10 +9,13 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+# find_package(actionlib REQUIRED)
+find_package(actionlib_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/DoorControl.srv"
-  DEPENDENCIES std_msgs
+  "action/DoorControl.action"
+  DEPENDENCIES std_msgs actionlib_msgs
  )
 
 

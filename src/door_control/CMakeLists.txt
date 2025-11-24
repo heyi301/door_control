@@ -8,13 +8,16 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
+# find_package(actionlib REQUIRED)
+find_package(actionlib_msgs REQUIRED)
 find_package(door_interface REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 add_executable(door_control_node src/door_control_node.cpp include/cmd_sender.hpp)
-ament_target_dependencies(door_control_node rclcpp std_msgs door_interface)
+ament_target_dependencies(door_control_node rclcpp rclcpp_action std_msgs door_interface)
 install(TARGETS
  door_control_node
   DESTINATION lib/${PROJECT_NAME}
