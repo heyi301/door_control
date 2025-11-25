@@ -4,41 +4,52 @@ project(door_control)
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
+include_directories(include include/common include/nlohmann)
+link_directories(src)
+set (
+  DEPENDENCY_LIST
+  unitree_go
+  unitree_hg
+  unitree_api
+  rclcpp
+  std_msgs
+  rosbag2_cpp
+  rclcpp_action 
+  door_interface 
+)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
-# find_package(actionlib REQUIRED)
 find_package(actionlib_msgs REQUIRED)
 find_package(door_interface REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
-add_executable(door_control_node src/door_control_node.cpp include/cmd_sender.hpp)
-ament_target_dependencies(door_control_node rclcpp rclcpp_action std_msgs door_interface)
-install(TARGETS
- door_control_node
-  DESTINATION lib/${PROJECT_NAME}
+find_package(Threads REQUIRED)
 
+find_package(unitree_go REQUIRED)
+find_package(unitree_hg REQUIRED)
+find_package(unitree_api REQUIRED)
+
+
+find_package(rosbag2_cpp REQUIRED)
+find_package(Eigen3 REQUIRED)
+
+add_executable(door_control_node src/door_control_node.cpp include/cmd_sender.hpp src/common/ros2_sport_client.cpp)
+target_compile_features(door_control_node PRIVATE cxx_std_20)
+
+ament_target_dependencies(door_control_node ${DEPENDENCY_LIST})
+
+
+
+install(TARGETS
+  door_control_node
+  DESTINATION lib/${PROJECT_NAME}
 )
-# 安装 launch 文件
+
 install(DIRECTORY
   launch
   DESTINATION share/${PROJECT_NAME}/
 )
-
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
-  set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
 
 ament_package()

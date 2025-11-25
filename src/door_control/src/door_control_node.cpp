@@ -1,5 +1,5 @@
-#include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/string.hpp"
+
+
 #include <door_interface/action/detail/door_control__struct.hpp>
 #include <memory>
 #include <rclcpp/logging.hpp>
@@ -15,6 +15,17 @@
 #include "../include/cmd_sender.hpp"
 #include "door_interface/action/door_control.hpp"
 #include <thread>
+#include <chrono>
+#include <cmath>
+#include <memory>
+#include <rclcpp/executors/multi_threaded_executor.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/string.hpp>
+#include <thread>
+#include <unitree_go/msg/detail/sport_mode_state__struct.hpp>
+#include "common/ros2_sport_client.h"
+#include "unitree_go/msg/sport_mode_state.hpp"
+
 
 class DoorControlNode : public rclcpp::Node
 {
@@ -45,6 +56,7 @@ class DoorControlNode : public rclcpp::Node
 
 
   private:
+    
    SerialSender serial_sender_{"/dev/ttyBOX1"}; // Initialize SerialSender with the appropriate port
    int box_id_;
    int box_status_;
@@ -53,6 +65,7 @@ class DoorControlNode : public rclcpp::Node
    std::string data;
    rclcpp::Service<door_interface::srv::DoorControl>::SharedPtr door_service_;
    rclcpp_action::Server<door_interface::action::DoorControl>::SharedPtr door_action_service_;
+    
    void control_door(const std::shared_ptr<door_interface::srv::DoorControl::Request> request,
                      std::shared_ptr<door_interface::srv::DoorControl::Response> response)
    {
@@ -129,6 +142,7 @@ class DoorControlNode : public rclcpp::Node
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
+  
   auto node = std::make_shared<DoorControlNode>();
   RCLCPP_INFO(node->get_logger(), "Control Door Node has started.");
   rclcpp::spin(node);
