@@ -65,11 +65,11 @@ public:
 
   void HighStateHandler(const unitree_go::msg::SportModeState::SharedPtr msg) {
     state_ = *msg;
-    RCLCPP_INFO(this->get_logger(), "Position: %f, %f, %f", state_.position[0],
-                state_.position[1], state_.position[2]);
-    RCLCPP_INFO(this->get_logger(), "IMU rpy: %f, %f, %f",
-                state_.imu_state.rpy[0], state_.imu_state.rpy[1],
-                state_.imu_state.rpy[2]);
+    // RCLCPP_INFO(this->get_logger(), "Position: %f, %f, %f", state_.position[0],
+    //             state_.position[1], state_.position[2]);
+    // RCLCPP_INFO(this->get_logger(), "IMU rpy: %f, %f, %f",
+    //             state_.imu_state.rpy[0], state_.imu_state.rpy[1],
+    //             state_.imu_state.rpy[2]);
   }
 
   void control_door(
@@ -103,7 +103,7 @@ public:
     this->data = std::to_string(this->box_id_) +
                  std::to_string(this->box_status_) +
                  std::to_string(this->door_cmd_);
-    door_status_ = serial_sender_.sendData(this->data);
+    // door_status_ = serial_sender_.sendData(this->data);
     (void)uuid; // 避免未使用参数警告
     return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
   }
@@ -143,8 +143,14 @@ public:
     feedback_msg->current_action = 0;
     door_control->publish_feedback(feedback_msg);
     if (box_id == 0) {
-      sport_client_.StandUp(req_);
-      sport_client_.Euler(req_, 0.78, 0, 0);
+      // sport_client_.StandUp(req_);
+      sport_client_.Euler(req_, 1.2, 0, 0);
+      sport_client_.BalanceStand(req_);
+      usleep(int(1000000));
+      sport_client_.Euler(req_, 1.2, 0, 0);
+      sport_client_.BalanceStand(req_);
+      usleep(int(1000000));
+      RCLCPP_INFO(this->get_logger(), "倾斜");
       // 执行倾倒动作
       feedback_msg->current_action = 1;
       door_control->publish_feedback(feedback_msg);
@@ -152,13 +158,15 @@ public:
       this->data = std::to_string(this->box_id_) +
                  std::to_string(this->box_status_) +
                  std::to_string(0) + "#";
-      door_status_ =
-        serial_sender_.sendData(this->data); // Send command and get door status
+      // door_status_ =
+      //   serial_sender_.sendData(this->data); // Send command and get door status
       feedback_msg->current_action = 2;
       door_control->publish_feedback(feedback_msg);
       // 执行回正动作并略微超调
-      sport_client_.Euler(req_, -0.3, 0, 0);
-      sport_client_.Euler(req_, 0, 0, 0);
+      sport_client_.Euler(req_, 0.5, 0, 0);
+      sport_client_.BalanceStand(req_);
+      usleep(int(1000000));
+      sport_client_.RecoveryStand(req_);
       feedback_msg->current_action = 3;
       door_control->publish_feedback(feedback_msg);
       auto result = std::make_shared<
@@ -166,9 +174,36 @@ public:
       result->result = door_status_;
       door_control->succeed(result);
     } else {
+      // sport_client_.StandUp(req_);
+      sport_client_.Euler(req_, 1.2, 0, 0);
+      sport_client_.BalanceStand(req_);
+      usleep(int(1000000));
+      sport_client_.Euler(req_, 1.2, 0, 0);
+      sport_client_.BalanceStand(req_);
+      usleep(int(1000000));
+      RCLCPP_INFO(this->get_logger(), "倾斜");
       // 执行倾倒动作
+      feedback_msg->current_action = 1;
+      door_control->publish_feedback(feedback_msg);
       // 上锁
+      this->data = std::to_string(this->box_id_) +
+                 std::to_string(this->box_status_) +
+                 std::to_string(0) + "#";
+      // door_status_ =
+      //   serial_sender_.sendData(this->data); // Send command and get door status
+      feedback_msg->current_action = 2;
+      door_control->publish_feedback(feedback_msg);
       // 执行回正动作并略微超调
+      sport_client_.Euler(req_, -0.5, 0, 0);
+      sport_client_.BalanceStand(req_);
+      usleep(int(1000000));
+      sport_client_.RecoveryStand(req_);
+      feedback_msg->current_action = 3;
+      door_control->publish_feedback(feedback_msg);
+      auto result = std::make_shared<
+          typename door_interface::action::DoorControl::Result>();
+      result->result = door_status_;
+      door_control->succeed(result);
     }
   }
 private:
