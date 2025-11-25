@@ -158,11 +158,12 @@ public:
       this->data = std::to_string(this->box_id_) +
                  std::to_string(this->box_status_) +
                  std::to_string(0) + "#";
-      // door_status_ =
-      //   serial_sender_.sendData(this->data); // Send command and get door status
+      door_status_ =
+        serial_sender_.sendData(this->data); // Send command and get door status
       feedback_msg->current_action = 2;
       door_control->publish_feedback(feedback_msg);
       // 执行回正动作并略微超调
+      RCLCPP_INFO(this->get_logger(), "回正");
       sport_client_.Euler(req_, 0.5, 0, 0);
       sport_client_.BalanceStand(req_);
       usleep(int(1000000));
@@ -189,8 +190,8 @@ public:
       this->data = std::to_string(this->box_id_) +
                  std::to_string(this->box_status_) +
                  std::to_string(0) + "#";
-      // door_status_ =
-      //   serial_sender_.sendData(this->data); // Send command and get door status
+      door_status_ =
+        serial_sender_.sendData(this->data); // Send command and get door status
       feedback_msg->current_action = 2;
       door_control->publish_feedback(feedback_msg);
       // 执行回正动作并略微超调
