@@ -2,5 +2,5 @@ build/
 .cache/
 install/
 log/
-cyclonedds_ws/src/cyclonedds/
-cyclonedds_ws/src/rmw_cyclonedds/
+cyclonedds_ws/src/cyclonedds
+cyclonedds_ws/src/rmw_cyclonedds
