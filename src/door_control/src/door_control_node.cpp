@@ -202,7 +202,9 @@ public:
       sport_client_.Euler(req_, -0.5, 0, 0);
       sport_client_.BalanceStand(req_);
       usleep(int(1000000));
-      sport_client_.FreeWalk(req_);
+      sport_client_.Euler(req_, 0., 0., 0.);
+      sleep(1);
+      sport_client_.ClassicWalk(req_,true);
       feedback_msg->current_action = 3;
       door_control->publish_feedback(feedback_msg);
       auto result = std::make_shared<
