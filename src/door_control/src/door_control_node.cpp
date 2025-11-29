@@ -1,7 +1,7 @@
 
 
 #include "../include/cmd_sender.hpp"
-#include "common/ros2_sport_client.h"
+#include "common/ros2_b2_sport_client.h"
 #include "door_interface/action/door_control.hpp"
 #include "door_interface/srv/door_control.hpp"
 #include "unitree_go/msg/sport_mode_state.hpp"
@@ -52,6 +52,7 @@ public:
         [this](const unitree_go::msg::SportModeState::SharedPtr data) {
           HighStateHandler(data);
         });
+    // sport_client_.Init();
   }
 
   void GetInitState() {
@@ -143,18 +144,12 @@ public:
     feedback_msg->current_action = 0;
     door_control->publish_feedback(feedback_msg);
     if (box_id == 1) {
-       // jie锁
-      this->data = std::to_string(this->box_id_) +
-                 std::to_string(this->box_status_) +
-                 std::to_string(0) + "#";
-      door_status_ =
-        serial_sender_.sendData(this->data); // Send command and get door status
-      // sport_client_.StandUp(req_);
-      sport_client_.Euler(req_, -0.8, 0, 0);
-      sport_client_.BalanceStand(req_);
-      usleep(int(1000000));
-      sport_client_.Euler(req_, -0.8, 0, 0);
-      sport_client_.BalanceStand(req_);
+
+      sport_client_.Euler(req_,-0.6,0.,0.);
+      // sport_client_.BalanceStand(req_);
+      sleep(1);
+      sport_client_.Euler(req_, -0.6, 0, 0);
+      // sport_client_.BalanceStand(req_);
       usleep(int(1000000));
       RCLCPP_INFO(this->get_logger(), "倾斜");
       // 执行倾倒动作
@@ -163,17 +158,20 @@ public:
       // 上锁
       this->data = std::to_string(this->box_id_) +
                  std::to_string(this->box_status_) +
-                 std::to_string(1) + "#";
+                 std::to_string(0) + "#";
       door_status_ =
         serial_sender_.sendData(this->data); // Send command and get door status
       feedback_msg->current_action = 2;
       door_control->publish_feedback(feedback_msg);
       // 执行回正动作并略微超调
       RCLCPP_INFO(this->get_logger(), "回正");
-      sport_client_.Euler(req_, 0.5, 0, 0);
-      sport_client_.BalanceStand(req_);
+      sport_client_.Euler(req_, 0.2, 0, 0);
+      // sport_client_.BalanceStand(req_);
       usleep(int(1000000));
-      sport_client_.RecoveryStand(req_);
+      sport_client_.Euler(req_, 0., 0., 0.);
+      sleep(1);
+      sport_client_.ClassicWalk(req_,true);
+      // sport_client_.SwitchMoveMode(req_,true);
       feedback_msg->current_action = 3;
       door_control->publish_feedback(feedback_msg);
       auto result = std::make_shared<
@@ -181,18 +179,12 @@ public:
       result->result = door_status_;
       door_control->succeed(result);
     } else {
-       // 上锁
-      this->data = std::to_string(this->box_id_) +
-                 std::to_string(this->box_status_) +
-                 std::to_string(0) + "#";
-      door_status_ =
-        serial_sender_.sendData(this->data); // Send command and get door status
       // sport_client_.StandUp(req_);
       sport_client_.Euler(req_, 1.2, 0, 0);
       sport_client_.BalanceStand(req_);
       usleep(int(1000000));
       sport_client_.Euler(req_, 1.2, 0, 0);
-      sport_client_.BalanceStand(req_);
+      // sport_client_.BalanceStand(req_);
       usleep(int(1000000));
       RCLCPP_INFO(this->get_logger(), "倾斜");
       // 执行倾倒动作
@@ -201,7 +193,7 @@ public:
       // 上锁
       this->data = std::to_string(this->box_id_) +
                  std::to_string(this->box_status_) +
-                 std::to_string(1) + "#";
+                 std::to_string(0) + "#";
       door_status_ =
         serial_sender_.sendData(this->data); // Send command and get door status
       feedback_msg->current_action = 2;
@@ -210,7 +202,7 @@ public:
       sport_client_.Euler(req_, -0.5, 0, 0);
       sport_client_.BalanceStand(req_);
       usleep(int(1000000));
-      sport_client_.RecoveryStand(req_);
+      sport_client_.FreeWalk(req_);
       feedback_msg->current_action = 3;
       door_control->publish_feedback(feedback_msg);
       auto result = std::make_shared<
@@ -219,10 +211,9 @@ public:
       door_control->succeed(result);
     }
   }
+private:
   SerialSender serial_sender_{
       "/dev/ttyBOX1"}; // Initialize SerialSender with the appropriate port
-private:
-  
   int box_id_;
   int box_status_;
   int door_cmd_;
@@ -257,10 +248,6 @@ int main(int argc, char *argv[]) {
 
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(node);
-  std::string init_data=std::to_string(2) +
-                 std::to_string(1) +
-                 std::to_string(1) + "#";
-  node->serial_sender_.sendData(init_data); // Send command and get door status
   executor.spin();
   rclcpp::shutdown();
   return 0;

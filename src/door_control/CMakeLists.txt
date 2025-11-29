@@ -35,7 +35,7 @@ find_package(unitree_api REQUIRED)
 find_package(rosbag2_cpp REQUIRED)
 find_package(Eigen3 REQUIRED)
 
-add_executable(door_control_node src/door_control_node.cpp include/cmd_sender.hpp src/common/ros2_sport_client.cpp)
+add_executable(door_control_node src/door_control_node.cpp include/cmd_sender.hpp src/common/ros2_b2_sport_client.cpp)
 target_compile_features(door_control_node PRIVATE cxx_std_20)
 
 ament_target_dependencies(door_control_node ${DEPENDENCY_LIST})
